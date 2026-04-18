@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0a0f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="複利計算機">
+<meta name="description" content="複利計算機 - 計算投資成長">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.svg">
+<title>複利計算機</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --surface2: #1c1c26;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.12);
+    --text: #f0f0f5;
+    --muted: #6b6b80;
+    --accent: #6c63ff;
+    --accent2: #a78bfa;
+    --green: #34d399;
+    --amber: #fbbf24;
+    --mono: 'DM Mono', monospace;
+    --sans: 'Noto Sans TC', sans-serif;
+  }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-weight: 300;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  body {
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Header */
+  .header {
+    padding: 20px 20px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .header-title {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-family: var(--mono);
+  }
+  .header-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 12px var(--accent);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  /* Main result */
+  .result-section {
+    padding: 24px 20px 20px;
+    position: relative;
+  }
+  .result-label {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-family: var(--mono);
+    margin-bottom: 6px;
+  }
+  .result-value {
+    font-family: var(--mono);
+    font-size: clamp(36px, 10vw, 52px);
+    font-weight: 500;
+    color: var(--text);
+    letter-spacing: -0.02em;
+    line-height: 1;
+    transition: all 0.3s ease;
+  }
+  .result-value span {
+    font-size: 0.45em;
+    color: var(--muted);
+    font-weight: 400;
+    vertical-align: top;
+    margin-top: 0.2em;
+    display: inline-block;
+  }
+
+  /* Stats row */
+  .stats-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    padding: 0 20px 20px;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 12px;
+    padding: 12px;
+  }
+  .stat-label {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+    margin-bottom: 4px;
+    font-family: var(--mono);
+  }
+  .stat-value {
+    font-family: var(--mono);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+  }
+  .stat-value.green { color: var(--green); }
+  .stat-value.accent { color: var(--accent2); }
+
+  /* Chart */
+  .chart-section {
+    padding: 0 20px 20px;
+    position: relative;
+  }
+  .chart-wrap {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 16px;
+    padding: 16px;
+    position: relative;
+    height: 180px;
+  }
+  canvas { display: block; }
+
+  /* Legend */
+  .legend {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 12px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--muted);
+    font-family: var(--mono);
+  }
+  .legend-dot {
+    width: 8px; height: 8px;
+    border-radius: 2px;
+  }
+
+  /* Inputs */
+  .inputs-section {
+    padding: 0 20px;
+    display: grid;
+    gap: 10px;
+    flex: 1;
+  }
+  .input-row {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: border-color 0.2s;
+  }
+  .input-row:focus-within {
+    border-color: var(--border2);
+  }
+  .input-left { display: flex; flex-direction: column; gap: 2px; }
+  .input-name {
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+  }
+  .input-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .input-unit {
+    font-size: 13px;
+    color: var(--muted);
+    font-family: var(--mono);
+  }
+  input[type=number] {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 18px;
+    font-weight: 500;
+    text-align: right;
+    width: 130px;
+    -moz-appearance: textfield;
+  }
+  input[type=number]::-webkit-outer-spin-button,
+  input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+  /* Freq */
+  .freq-section {
+    padding: 0 20px 16px;
+  }
+  .freq-label {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-family: var(--mono);
+    margin-bottom: 8px;
+  }
+  .freq-group {
+    display: flex;
+    gap: 8px;
+  }
+  .freq-btn {
+    flex: 1;
+    padding: 9px 4px;
+    border-radius: 10px;
+    border: 0.5px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 12px;
+    font-family: var(--mono);
+    cursor: pointer;
+    transition: all 0.2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .freq-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    font-weight: 500;
+    box-shadow: 0 0 20px rgba(108,99,255,0.3);
+  }
+
+  /* Safe area */
+  .bottom-pad { height: max(20px, env(safe-area-inset-bottom)); }
+
+  /* Divider */
+  .divider {
+    height: 0.5px;
+    background: var(--border);
+    margin: 0 20px 16px;
+  }
+
+  /* Install banner */
+  #install-banner {
+    display: none;
+    margin: 0 20px 12px;
+    background: linear-gradient(135deg, rgba(108,99,255,0.15), rgba(167,139,250,0.1));
+    border: 0.5px solid rgba(108,99,255,0.3);
+    border-radius: 12px;
+    padding: 12px 14px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  #install-banner.show { display: flex; }
+  .install-text { font-size: 12px; color: var(--accent2); }
+  .install-btn {
+    background: var(--accent);
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 12px;
+    font-family: var(--mono);
+    padding: 6px 12px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-title">複利計算機</div>
+  <div class="header-dot"></div>
+</div>
+
+<div class="result-section">
+  <div class="result-label">最終資產</div>
+  <div class="result-value" id="m-final"><span>NT$</span>—</div>
+</div>
+
+<div class="stats-row">
+  <div class="stat-card">
+    <div class="stat-label">投入本金</div>
+    <div class="stat-value" id="m-invested">—</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">利息收益</div>
+    <div class="stat-value green" id="m-interest">—</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">報酬倍數</div>
+    <div class="stat-value accent" id="m-mult">—</div>
+  </div>
+</div>
+
+<div class="chart-section">
+  <div class="chart-wrap">
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#6c63ff"></div>最終資產</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#3d3d52;border:1px dashed #6b6b80"></div>投入本金</div>
+    </div>
+    <div style="position:relative;height:128px;">
+      <canvas id="chart" role="img" aria-label="複利成長折線圖"></canvas>
+    </div>
+  </div>
+</div>
+
+<div class="inputs-section">
+  <div class="input-row">
+    <div class="input-left">
+      <div class="input-name">初始本金</div>
+    </div>
+    <div class="input-right">
+      <span class="input-unit">NT$</span>
+      <input type="number" id="principal" value="100000" min="0" step="1000" inputmode="numeric">
+    </div>
+  </div>
+  <div class="input-row">
+    <div class="input-left">
+      <div class="input-name">年利率</div>
+    </div>
+    <div class="input-right">
+      <input type="number" id="rate" value="6" min="0" max="100" step="0.1" inputmode="decimal">
+      <span class="input-unit">%</span>
+    </div>
+  </div>
+  <div class="input-row">
+    <div class="input-left">
+      <div class="input-name">投資年數</div>
+    </div>
+    <div class="input-right">
+      <input type="number" id="years" value="20" min="1" max="100" step="1" inputmode="numeric">
+      <span class="input-unit">年</span>
+    </div>
+  </div>
+  <div class="input-row">
+    <div class="input-left">
+      <div class="input-name">每月定投</div>
+    </div>
+    <div class="input-right">
+      <span class="input-unit">NT$</span>
+      <input type="number" id="monthly" value="5000" min="0" step="1000" inputmode="numeric">
+    </div>
+  </div>
+</div>
+
+<div style="height:16px"></div>
+
+<div class="freq-section">
+  <div class="freq-label">複利頻率</div>
+  <div class="freq-group" id="freq-group">
+    <button class="freq-btn" data-n="1">每年</button>
+    <button class="freq-btn active" data-n="12">每月</button>
+    <button class="freq-btn" data-n="4">每季</button>
+    <button class="freq-btn" data-n="365">每日</button>
+  </div>
+</div>
+
+<div id="install-banner">
+  <div class="install-text">加入主畫面，隨時使用</div>
+  <button class="install-btn" id="install-btn">安裝 App</button>
+</div>
+
+<div class="bottom-pad"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+let compFreq = 12;
+let chart;
+let deferredPrompt;
+
+const fmtShort = v => {
+  if (v >= 1e8) return (v/1e8).toFixed(1) + '億';
+  if (v >= 1e4) return (v/1e4).toFixed(1) + '萬';
+  return Math.round(v).toLocaleString();
+};
+
+function calc() {
+  const P = Math.max(0, +document.getElementById('principal').value || 0);
+  const r = Math.max(0, +document.getElementById('rate').value || 0) / 100;
+  const Y = Math.max(1, Math.round(+document.getElementById('years').value || 1));
+  const M = Math.max(0, +document.getElementById('monthly').value || 0);
+  const n = compFreq;
+  const rn = r / n;
+
+  const labels = [], principalData = [], totalData = [];
+  for (let y = 0; y <= Y; y++) {
+    const t = n * y;
+    const compP = P * Math.pow(1 + rn, t);
+    const compM = M > 0 && r > 0 ? M * (Math.pow(1 + r/12, 12*y) - 1) / (r/12) : M * 12 * y;
+    const total = compP + compM;
+    const invested = P + M * 12 * y;
+    labels.push(y === 0 ? '現在' : y + '年');
+    principalData.push(Math.round(invested));
+    totalData.push(Math.round(total));
+  }
+
+  const finalTotal = totalData[totalData.length - 1];
+  const finalInvested = principalData[principalData.length - 1];
+  const interest = finalTotal - finalInvested;
+  const mult = finalInvested > 0 ? (finalTotal / finalInvested).toFixed(2) + 'x' : '—';
+
+  document.getElementById('m-final').innerHTML = '<span>NT$</span>' + fmtShort(finalTotal);
+  document.getElementById('m-invested').textContent = fmtShort(finalInvested);
+  document.getElementById('m-interest').textContent = '+' + fmtShort(interest);
+  document.getElementById('m-mult').textContent = mult;
+
+  if (chart) chart.destroy();
+  chart = new Chart(document.getElementById('chart'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: '最終資產',
+          data: totalData,
+          borderColor: '#6c63ff',
+          backgroundColor: 'rgba(108,99,255,0.12)',
+          fill: true, tension: 0.4, pointRadius: 0, borderWidth: 2
+        },
+        {
+          label: '投入本金',
+          data: principalData,
+          borderColor: '#3d3d52',
+          backgroundColor: 'transparent',
+          fill: false, tension: 0.4, pointRadius: 0, borderWidth: 1.5,
+          borderDash: [4, 3]
+        }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      animation: { duration: 300 },
+      plugins: { legend: { display: false }, tooltip: {
+        callbacks: { label: ctx => ctx.dataset.label + ': NT$' + fmtShort(ctx.raw) }
+      }},
+      scales: {
+        x: { ticks: { font: { size: 10, family: 'DM Mono' }, color: '#4a4a60', autoSkip: true, maxTicksLimit: 6 }, grid: { display: false }, border: { display: false } },
+        y: { ticks: { font: { size: 10, family: 'DM Mono' }, color: '#4a4a60', callback: v => fmtShort(v) }, grid: { color: 'rgba(255,255,255,0.04)' }, border: { display: false } }
+      }
+    }
+  });
+}
+
+['principal','rate','years','monthly'].forEach(id => {
+  document.getElementById(id).addEventListener('input', calc);
+});
+
+document.getElementById('freq-group').addEventListener('click', e => {
+  const btn = e.target.closest('[data-n]');
+  if (!btn) return;
+  document.querySelectorAll('.freq-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  compFreq = +btn.dataset.n;
+  calc();
+});
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('install-banner').classList.add('show');
+});
+
+document.getElementById('install-btn').addEventListener('click', async () => {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') document.getElementById('install-banner').classList.remove('show');
+    deferredPrompt = null;
+  }
+});
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+
+calc();
+</script>
+</body>
+</html>
