@@ -1,10 +1,22 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
+  <!-- 背景 -->
   <rect width="192" height="192" rx="40" fill="#0a0a0f"/>
-  <text x="96" y="52" font-family="monospace" font-size="26" font-weight="500" text-anchor="middle" fill="#a78bfa">NT$</text>
-  <rect x="28" y="112" width="22" height="52" rx="5" fill="#6c63ff" opacity="0.45"/>
-  <rect x="58" y="96" width="22" height="68" rx="5" fill="#6c63ff" opacity="0.6"/>
-  <rect x="88" y="104" width="22" height="60" rx="5" fill="#6c63ff" opacity="0.55"/>
-  <rect x="118" y="80" width="22" height="84" rx="5" fill="#6c63ff" opacity="0.8"/>
-  <rect x="148" y="60" width="22" height="104" rx="5" fill="#a78bfa"/>
-  <rect x="22" y="166" width="154" height="3" rx="1.5" fill="#a78bfa" opacity="0.3"/>
+
+  <!-- NT$ 文字 -->
+  <text x="96" y="52" font-family="monospace" font-size="26" font-weight="500" text-anchor="middle" fill="#ffffff" opacity="0.85">NT$</text>
+
+  <!-- 長條圖：以紅為主，穿插一根綠，最高最亮是紅 -->
+  <!-- bar 1 紅 -->
+  <rect x="28" y="118" width="22" height="46" rx="5" fill="#ef4444" opacity="0.6"/>
+  <!-- bar 2 綠（跌） -->
+  <rect x="58" y="108" width="22" height="56" rx="5" fill="#22c55e" opacity="0.6"/>
+  <!-- bar 3 紅 -->
+  <rect x="88" y="96" width="22" height="68" rx="5" fill="#ef4444" opacity="0.75"/>
+  <!-- bar 4 紅 -->
+  <rect x="118" y="78" width="22" height="86" rx="5" fill="#ef4444" opacity="0.88"/>
+  <!-- bar 5 紅（最高最亮） -->
+  <rect x="148" y="58" width="22" height="106" rx="5" fill="#ef4444"/>
+
+  <!-- 底線 -->
+  <rect x="22" y="166" width="154" height="3" rx="1.5" fill="#ef4444" opacity="0.4"/>
 </svg>
