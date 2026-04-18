@@ -1,4 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
   <rect width="192" height="192" rx="40" fill="#0a0a0f"/>
-  <text x="96" y="130" font-family="serif" font-size="90" text-anchor="middle" fill="#6c63ff">%</text>
+  <text x="96" y="52" font-family="monospace" font-size="26" font-weight="500" text-anchor="middle" fill="#a78bfa">NT$</text>
+  <rect x="28" y="112" width="22" height="52" rx="5" fill="#6c63ff" opacity="0.45"/>
+  <rect x="58" y="96" width="22" height="68" rx="5" fill="#6c63ff" opacity="0.6"/>
+  <rect x="88" y="104" width="22" height="60" rx="5" fill="#6c63ff" opacity="0.55"/>
+  <rect x="118" y="80" width="22" height="84" rx="5" fill="#6c63ff" opacity="0.8"/>
+  <rect x="148" y="60" width="22" height="104" rx="5" fill="#a78bfa"/>
+  <rect x="22" y="166" width="154" height="3" rx="1.5" fill="#a78bfa" opacity="0.3"/>
 </svg>
