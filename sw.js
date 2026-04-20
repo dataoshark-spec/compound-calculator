@@ -1,12 +1,23 @@
-const CACHE = 'compound-v1';
+const CACHE = 'compound-v2';
 const ASSETS = [
   './',
   './index.html',
-  './manifest.json'
+  './manifest.json',
+  './icon-192.svg',
+  './icon-512.svg'
 ];
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
+  e.waitUntil(
+    caches.open(CACHE).then(c =>
+      // 用 addAll 但容錯：某個 icon 不存在時不讓整個 install 失敗
+      Promise.all(
+        ASSETS.map(url =>
+          c.add(url).catch(err => console.warn('Failed to cache', url, err))
+        )
+      )
+    )
+  );
   self.skipWaiting();
 });
 
